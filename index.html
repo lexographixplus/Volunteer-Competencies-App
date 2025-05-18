@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Competencies Form (Firebase)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .form-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        .form-container:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        .form-header {
+            background: linear-gradient(135deg, #4F46E5 0%, #8B5CF6 100%);
+            color: white;
+            padding: 2rem;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        .form-section-title { 
+            color: #3730a3; 
+            padding: 0.75rem 0; 
+            font-weight: 700; 
+            font-size: 1.25rem; 
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #e0e7ff;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4F46E5 0%, #8B5CF6 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+        }
+        .btn-secondary {
+            background-color: #e0e7ff;
+            color: #4F46E5;
+            border: 1px solid #4F46E5;
+        }
+        .btn-secondary:hover {
+            background-color: #c7d2fe;
+        }
+        .btn-disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        label {
+            font-weight: 500;
+            color: #374151;
+        }
+        input[type="text"], input[type="email"], input[type="date"], select, textarea {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            width: 100%;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            background-color: white;
+        }
+        input[type="text"]:focus, input[type="email"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.25);
+            outline: none;
+        }
+        .rating-group label {
+            margin-right: 0.5rem;
+        }
+        .rating-group input[type="radio"] {
+            margin-right: 0.25rem;
+        }
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s 0.3s linear;
+        }
+        .custom-modal.show {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0s 0s linear;
+        }
+        .custom-modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .custom-modal.show .custom-modal-content {
+            transform: scale(1);
+        }
+        .custom-modal-content h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: #3730a3;
+        }
+        .custom-modal-content p {
+            margin-bottom: 1.5rem;
+            color: #4b5563;
+        }
+        .custom-modal-close-btn {
+            background-color: #4F46E5;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .form-step {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .form-step.active-step {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .step-navigation {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .progress-bar {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 2rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e0e7ff;
+        }
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #d1d5db;
+            font-size: 0.75rem; 
+            text-align: center;
+            position: relative;
+            flex: 1;
+        }
+        .progress-step .dot {
+            width: 28px; 
+            height: 28px;
+            border-radius: 50%;
+            background-color: currentColor;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s;
+            border: 2px solid #e0e7ff; 
+        }
+         .progress-step.active .dot {
+            background-color: #4F46E5;
+            border-color: #4F46E5;
+        }
+        .progress-step.active {
+            color: #4F46E5;
+            font-weight: 600;
+        }
+        .progress-step.completed .dot {
+            background-color: #10B981;
+            border-color: #10B981;
+        }
+        .progress-step.completed {
+            color: #059669;
+        }
+        .progress-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 14px; 
+            left: 50%;
+            width: calc(100% - 30px); 
+            height: 2px;
+            background-color: #e0e7ff;
+            z-index: -1;
+            transform: translateX(15px);
+        }
+         .progress-step.completed:not(:last-child)::after {
+            background-color: #10B981;
+        }
+        .competency-item { 
+             margin-bottom: 1.5rem; 
+             padding: 1rem; 
+             border: 1px solid #e5e7eb; 
+             border-radius: 8px; 
+             background-color: #f9fafb;
+        }
+
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div id="volunteerFormContainer" class="form-container max-w-4xl mx-auto">
+        <div class="form-header">
+            <h1 class="text-3xl md:text-4xl font-bold text-center">Volunteer Competencies Form</h1>
+            <p class="text-center mt-2 text-indigo-200">Thank you for your dedication and service.</p>
+        </div>
+
+        <form id="volunteerForm" class="p-6 md:p-10 space-y-8">
+            <div id="progressBar" class="progress-bar">
+                <div class="progress-step active" data-step="1">
+                    <div class="dot">1</div>
+                    Personal Info
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="dot">2</div>
+                    Leadership
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="dot">3</div>
+                    Responsibility
+                </div>
+                <div class="progress-step" data-step="4">
+                    <div class="dot">4</div>
+                    Community
+                </div>
+                <div class="progress-step" data-step="5">
+                    <div class="dot">5</div>
+                    Development
+                </div>
+            </div>
+
+            <div id="step-1" class="form-step active-step">
+                <div class="form-section-title">Personal Information</div>
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Select Program Category:</label>
+                    <select id="category" name="category" class="mt-1 block w-full" required>
+                        <option value="" disabled selected>-- Select a Category --</option>
+                        <option value="PST">PST (Pre-Service Training)</option>
+                        <option value="IST-1">IST-1 (In-Service Training 1)</option>
+                        <option value="IST-2">IST-2 (In-Service Training 2)</option>
+                        <option value="COS">COS (Close of Service)</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div>
+                        <label for="formCompletedBy">Country:</label> <input type="text" id="formCompletedBy" name="formCompletedBy" required>
+                    </div>
+                    <div>
+                        <label for="dateCompleted">Date Completed:</label>
+                        <input type="date" id="dateCompleted" name="dateCompleted" required>
+                    </div>
+                    <div>
+                        <label for="volunteerName">Volunteer Name:</label>
+                        <input type="text" id="volunteerName" name="volunteerName" required>
+                    </div>
+                    <div>
+                        <label for="volunteerCommunity">Community:</label>
+                        <input type="text" id="volunteerCommunity" name="volunteerCommunity" required>
+                    </div>
+                    <div>
+                        <label for="volunteerEmail">Email:</label>
+                        <input type="email" id="volunteerEmail" name="volunteerEmail" required>
+                    </div>
+                    <div>
+                        <label for="volunteerCohort">Enter your cohort number (e.g., G1, MA5):</label>
+                        <input type="text" id="volunteerCohort" name="volunteerCohort" placeholder="e.g., G1 or MA5" required>
+                    </div>
+                </div>
+                <div class="step-navigation">
+                    <span></span> <button type="button" class="btn btn-primary next-btn">Next <i class="fas fa-arrow-right ml-2"></i></button>
+                </div>
+            </div>
+
+            <div id="step-2" class="form-step">
+                <div class="form-section-title">Exemplify Leadership & Commitment to Service</div>
+                <div id="competenciesSection1">
+                    </div>
+                <div class="step-navigation">
+                    <button type="button" class="btn btn-secondary prev-btn"><i class="fas fa-arrow-left mr-2"></i> Previous</button>
+                    <button type="button" class="btn btn-primary next-btn">Next <i class="fas fa-arrow-right ml-2"></i></button>
+                </div>
+            </div>
+
+            <div id="step-3" class="form-step">
+                <div class="form-section-title">Demonstrate Personal Responsibility</div>
+                <div id="competenciesSection2">
+                    </div>
+                <div class="step-navigation">
+                    <button type="button" class="btn btn-secondary prev-btn"><i class="fas fa-arrow-left mr-2"></i> Previous</button>
+                    <button type="button" class="btn btn-primary next-btn">Next <i class="fas fa-arrow-right ml-2"></i></button>
+                </div>
+            </div>
+
+            <div id="step-4" class="form-step">
+                <div class="form-section-title">Integrate into Community</div>
+                <div id="competenciesSection3">
+                    </div>
+                <div class="step-navigation">
+                    <button type="button" class="btn btn-secondary prev-btn"><i class="fas fa-arrow-left mr-2"></i> Previous</button>
+                    <button type="button" class="btn btn-primary next-btn">Next <i class="fas fa-arrow-right ml-2"></i></button>
+                </div>
+            </div>
+
+            <div id="step-5" class="form-step">
+                <div class="form-section-title">Facilitate Community-Led Development</div>
+                <div id="competenciesSection4">
+                    </div>
+                <div class="step-navigation">
+                    <button type="button" class="btn btn-secondary prev-btn"><i class="fas fa-arrow-left mr-2"></i> Previous</button>
+                    <div id="formActionButtons" class="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4">
+                        <button type="button" id="downloadPdfBtn" class="btn btn-secondary">Download as PDF</button>
+                        <button type="submit" id="submitBtn" class="btn btn-primary">
+                            <span id="submitBtnText">Submit Form</span>
+                            <div id="submitSpinner" class="spinner hidden"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="messageModal" class="custom-modal">
+        <div class="custom-modal-content">
+            <h3 id="modalTitle">Notification</h3>
+            <p id="modalMessage">Your message here.</p>
+            <button id="modalCloseBtn" class="custom-modal-close-btn">Close</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_lcgd9BO8udBIKgvqLfbpWwBQx4gKIqk",
+            authDomain: "volunteer-competencies.firebaseapp.com",
+            projectId: "volunteer-competencies",
+            storageBucket: "volunteer-competencies.appspot.com",
+            messagingSenderId: "834830665261",
+            appId: "1:834830665261:web:3ef0bfd09600d8ba8a5aa4"
+        };
+
+        const fbApp = initializeApp(firebaseConfig);
+        const db = getFirestore(fbApp);
+        console.log("Firebase Initialized for Volunteer Form with Firestore support.");
+
+        const volunteerForm = document.getElementById('volunteerForm');
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitBtnText = document.getElementById('submitBtnText');
+        const submitSpinner = document.getElementById('submitSpinner');
+        const dateCompletedInput = document.getElementById('dateCompleted');
+        
+        const messageModal = document.getElementById('messageModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+        const steps = Array.from(document.querySelectorAll('.form-step'));
+        const nextBtns = document.querySelectorAll('.next-btn');
+        const prevBtns = document.querySelectorAll('.prev-btn');
+        const progressBarSteps = document.querySelectorAll('.progress-step');
+        let currentStep = 0;
+
+        const competenciesData = [
+            { 
+                sectionTitle: "Exemplify Leadership & Commitment to Service",
+                competencies: [
+                    { id: "Initiative", name: "Initiative", description: "Demonstrates the commitment, passion, and responsibility to serve as a CorpsAfrica Volunteer" },
+                    { id: "Adaptability", name: "Adaptability", description: "Demonstrates flexibility, perseverance, resourcefulness, resilience, and a growth mindset under challenging and changing circumstances" },
+                    { id: "ServiceOrientation", name: "Service Orientation", description: "Commits to improving the quality of life of the people with whom he/she lives and works" }
+                ]
+            },
+            { 
+                sectionTitle: "Demonstrate Personal Responsibility",
+                competencies: [
+                    { id: "PersonalConduct", name: "Personal Conduct", description: "Conducts himself/herself with personal and professional integrity, brings a positive attitude, manages his/her time appropriately, is reliable, and follows all organizational rules and local and national laws" },
+                    { id: "HealthSafetyWellBeing", name: "Health, Safety, & Well-Being", description: "Exercises sound judgment to protect his/her health, safety, and well-being and that of others" },
+                    { id: "Communication", name: "Communication", description: "Communicates effectively with a wide variety of stakeholders in written, verbal, and visual forms" }
+                ]
+            },
+            { 
+                sectionTitle: "Integrate into Community",
+                competencies: [
+                    { id: "Empathy", name: "Empathy", description: "Listens genuinely to others and practices perspective taking by seeking to understand the values, beliefs, attitudes, and worldviews of others" },
+                    { id: "HumilityTeamwork", name: "Humility & Teamwork", description: "Demonstrates humility and patience, builds trust, and engages with others in a spirit of teamwork, mutual learning, and respect" },
+                    { id: "LanguageInterculturalProficiency", name: "Language & Intercultural Proficiency", description: "Demonstrates awareness of his/her own cultural programming, navigates intercultural situations appropriately, and speaks in the language of the community" }
+                ]
+            },
+            { 
+                sectionTitle: "Facilitate Community-Led Development",
+                competencies: [
+                    { id: "HCD_ABCD", name: "HCD/ABCD", description: "Facilitates community conversations, community organizing, and collective problem-solving through applying the tools of HCD/ABCD to support communities as they lead and sustain their own development" },
+                    { id: "ProjectDesignManagement", name: "Project Design & Management", description: "Supports community members as they design and implement a community project, including in the development of proposals and budgets, project management, and monitoring and evaluation" },
+                    { id: "CapacityBuilding", name: "Capacity Building", description: "Trains and supports community members to strengthen local knowledge, skills, and mindsets" }
+                ]
+            }
+        ];
+
+        function renderCompetencySection(sectionData, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) {
+                console.error(`Container with id ${containerId} not found for section: ${sectionData.sectionTitle}`);
+                return;
+            }
+            container.innerHTML = ''; 
+
+            sectionData.competencies.forEach(comp => {
+                const compDiv = document.createElement('div');
+                compDiv.className = 'competency-item';
+                compDiv.innerHTML = `
+                    <h3 class="text-lg font-semibold text-indigo-700 mb-1">${comp.name}</h3>
+                    <p class="text-sm text-gray-600 mb-3">${comp.description}</p>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Rating (1=Does not meet, 5=Exemplary):</label>
+                        <div class="flex flex-wrap items-center rating-group">
+                            ${[1, 2, 3, 4, 5].map(i => `
+                                <label class="mr-4 text-sm text-gray-600 cursor-pointer">
+                                    <input type="radio" name="${comp.id}_Rating" value="${i}" class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500" required>
+                                    ${i}
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1" for="${comp.id}_Evidence">Evidence/Notes:</label>
+                        <textarea id="${comp.id}_Evidence" name="${comp.id}_Evidence" rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md p-2" placeholder="Provide specific examples or observations..."></textarea>
+                    </div>
+                `;
+                container.appendChild(compDiv);
+            });
+        }
+
+        function renderAllCompetencies() {
+            renderCompetencySection(competenciesData[0], 'competenciesSection1'); 
+            renderCompetencySection(competenciesData[1], 'competenciesSection2'); 
+            renderCompetencySection(competenciesData[2], 'competenciesSection3');
+            renderCompetencySection(competenciesData[3], 'competenciesSection4');
+        }
+
+        function showModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            messageModal.classList.add('show');
+        }
+
+        function closeModal() {
+            messageModal.classList.remove('show');
+        }
+
+        function setSubmitButtonState(isSubmitting) {
+            if (isSubmitting) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('btn-disabled');
+                submitBtnText.textContent = 'Submitting...';
+                submitSpinner.classList.remove('hidden');
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('btn-disabled');
+                submitBtnText.textContent = 'Submit Form';
+                submitSpinner.classList.add('hidden');
+            }
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            if (!validateStep(currentStep)) { 
+                showModal('Validation Error', 'Please complete all required fields in the final section.');
+                return;
+            }
+            setSubmitButtonState(true);
+            
+            const formData = new FormData(volunteerForm);
+            const data = {};
+            // Ensure consistent casing for field names if rules expect camelCase
+            formData.forEach((value, key) => {
+                // Example: convert VolunteerName to volunteerName if needed, though FormData usually uses HTML name attribute directly
+                // For this form, HTML name attributes are already mostly camelCase or appropriate.
+                data[key] = value;
+            });
+
+            // Ensure 'formCompletedBy' is included if it's in the form
+            // The HTML has been updated to re-add formCompletedBy.
+
+            data['SubmissionID'] = `SUB-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+            data['SubmissionTimestamp'] = new Date().toISOString();
+            
+            // ***** CONSOLE LOG FOR DEBUGGING *****
+            console.log("Data being sent to Firestore:", JSON.stringify(data, null, 2));
+            console.log("Category being used for collection:", data.category);
+            // ***** END CONSOLE LOG *****
+
+            try {
+                const docRef = await addDoc(collection(db, data.category), data);
+                console.log("Document written to Firestore with ID: ", docRef.id);
+                showModal('Success!', 'Your form has been submitted successfully to Firebase.');
+                volunteerForm.reset(); 
+                dateCompletedInput.valueAsDate = new Date(); 
+                currentStep = 0; 
+                updateFormStep();
+            } catch (error) {
+                console.error('Error submitting to Firestore:', error); 
+                showModal('Submission Failed', `Could not submit to Firebase. Error: ${error.message}. Check console and ensure Firestore rules allow writes to the '${data.category}' collection with all required fields correctly sent.`);
+            } finally {
+                setSubmitButtonState(false);
+            }
+        }
+
+        async function handleDownloadPdf() {
+            if (typeof html2canvas === 'undefined' || typeof jspdf === 'undefined') {
+                showModal('Error', 'PDF generation libraries are not loaded.');
+                return;
+            }
+            const { jsPDF } = window.jspdf;
+            const formToPrint = document.getElementById('volunteerForm');
+            showModal('Processing PDF', 'Generating PDF, please wait...');
+
+            const originalDisplayStates = steps.map(step => step.style.display);
+            const originalActionButtonsDisplay = document.getElementById('formActionButtons').style.display;
+
+            steps.forEach(step => step.style.display = 'block'); 
+            document.getElementById('formActionButtons').style.display = 'none'; 
+
+            try {
+                const canvas = await html2canvas(formToPrint, {
+                    scale: 1.5, 
+                    useCORS: true,
+                    logging: false,
+                    windowWidth: formToPrint.scrollWidth,
+                    windowHeight: formToPrint.scrollHeight
+                });
+
+                steps.forEach((step, index) => step.style.display = originalDisplayStates[index]); 
+                updateFormStep(); 
+                document.getElementById('formActionButtons').style.display = originalActionButtonsDisplay;
+
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF({
+                    orientation: 'p',
+                    unit: 'mm',
+                    format: 'a4',
+                    putOnlyUsedFonts: true,
+                    floatPrecision: 16
+                });
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const imgProps = pdf.getImageProperties(imgData);
+                const imgRatio = imgProps.width / imgProps.height;
+                let finalImgWidth, finalImgHeight;
+                const margin = 10;
+                const usableWidth = pdfWidth - 2 * margin;
+                const usableHeight = pdfHeight - 2 * margin;
+
+                if (imgProps.width / usableWidth > imgProps.height / usableHeight) {
+                    finalImgWidth = usableWidth;
+                    finalImgHeight = finalImgWidth / imgRatio;
+                } else {
+                    finalImgHeight = usableHeight;
+                    finalImgWidth = finalImgHeight * imgRatio;
+                }
+                const xPos = margin + (usableWidth - finalImgWidth) / 2;
+                const yPos = margin + (usableHeight - finalImgHeight) / 2;
+
+                pdf.addImage(imgData, 'PNG', xPos, yPos, finalImgWidth, finalImgHeight);
+                const volunteerNameInput = document.getElementById('volunteerName'); // Use consistent naming
+                const categoryInput = document.getElementById('category');
+
+                const volunteerName = volunteerNameInput ? volunteerNameInput.value : "Volunteer";
+                const category = categoryInput ? categoryInput.value : "Form";
+                const date = new Date().toISOString().split('T')[0];
+                pdf.save(`${volunteerName.replace(/\s+/g, '_')}_${category}_Competencies_${date}.pdf`);
+                closeModal();
+                setTimeout(() => showModal('PDF Generated', 'Your PDF has been downloaded successfully!'), 100);
+            } catch (err) {
+                console.error("Error generating PDF:", err);
+                steps.forEach((step, index) => step.style.display = originalDisplayStates[index]); 
+                updateFormStep();
+                document.getElementById('formActionButtons').style.display = originalActionButtonsDisplay;
+                closeModal();
+                setTimeout(() => showModal('PDF Error', `Could not generate PDF. Error: ${err.message}`), 100);
+            }
+        }
+
+        function updateFormStep() {
+            steps.forEach((step, index) => {
+                step.classList.toggle('active-step', index === currentStep);
+            });
+            updateProgressBar();
+        }
+
+        function validateStep(stepIndex) {
+            const currentStepElement = steps[stepIndex];
+            const inputs = currentStepElement.querySelectorAll('input[required], select[required], textarea[required]'); // Note: Textareas are not typically 'required' for content in the same way as inputs/selects for validation unless you add custom logic for them.
+            let isValid = true;
+            let firstInvalidInput = null;
+
+            inputs.forEach(input => {
+                let fieldValid = true;
+                input.classList.remove('border-red-500');
+                input.classList.add('border-gray-300');
+                const groupContainer = input.closest('.rating-group');
+                if (groupContainer) groupContainer.classList.remove('border-red-500', 'border-2');
+                const competencyDiv = input.closest('.competency-item');
+                if (competencyDiv) {
+                    const titleEl = competencyDiv.querySelector('h3');
+                    if (titleEl) titleEl.classList.remove('text-red-500');
+                }
+
+                if (input.type === 'radio') {
+                    const radioGroup = currentStepElement.querySelectorAll(`input[name="${input.name}"]`);
+                    if (!Array.from(radioGroup).some(radio => radio.checked)) {
+                        fieldValid = false;
+                        if (groupContainer) groupContainer.classList.add('border-red-500', 'border-2');
+                        if (competencyDiv) {
+                            const titleEl = competencyDiv.querySelector('h3');
+                            if (titleEl) titleEl.classList.add('text-red-500');
+                        }
+                    }
+                } else if (input.tagName.toLowerCase() !== 'textarea' && !input.value.trim()) { // Don't trim-check textareas for emptiness validation in this basic check, they can be intentionally empty.
+                    fieldValid = false;
+                    input.classList.add('border-red-500');
+                    input.classList.remove('border-gray-300');
+                } else if (input.tagName.toLowerCase() === 'select' && input.value === "") { // For select elements
+                     fieldValid = false;
+                    input.classList.add('border-red-500');
+                    input.classList.remove('border-gray-300');
+                }
+                
+                if (!fieldValid && isValid) {
+                    isValid = false;
+                    firstInvalidInput = input;
+                }
+            });
+
+            if (!isValid && firstInvalidInput) {
+                firstInvalidInput.focus();
+            }
+            return isValid;
+        }
+        
+        function updateProgressBar() {
+            progressBarSteps.forEach((stepElement, index) => {
+                const dot = stepElement.querySelector('.dot');
+                stepElement.classList.remove('active', 'completed');
+                dot.innerHTML = index + 1; 
+
+                if (index < currentStep) {
+                    stepElement.classList.add('completed');
+                    dot.innerHTML = '<i class="fas fa-check text-sm"></i>'; 
+                } else if (index === currentStep) {
+                    stepElement.classList.add('active');
+                }
+            });
+        }
+
+        nextBtns.forEach(button => {
+            button.addEventListener('click', () => {
+                if (validateStep(currentStep)) {
+                    if (currentStep < steps.length - 1) {
+                        progressBarSteps[currentStep].classList.add('completed');
+                        progressBarSteps[currentStep].classList.remove('active');
+                        progressBarSteps[currentStep].querySelector('.dot').innerHTML = '<i class="fas fa-check text-sm"></i>';
+
+                        currentStep++;
+                        updateFormStep();
+                        window.scrollTo(0,0); 
+                    }
+                } else {
+                    showModal('Validation Error', 'Please complete all required fields in the current section before proceeding.');
+                }
+            });
+        });
+
+        prevBtns.forEach(button => {
+            button.addEventListener('click', () => {
+                if (currentStep > 0) {
+                    progressBarSteps[currentStep].classList.remove('active');
+                    progressBarSteps[currentStep].querySelector('.dot').textContent = currentStep + 1;
+                    if(currentStep > 0) {
+                       progressBarSteps[currentStep -1].classList.remove('completed');
+                    }
+                    currentStep--;
+                    updateFormStep();
+                     window.scrollTo(0,0); 
+                }
+            });
+        });
+
+        function initializeForm() {
+            renderAllCompetencies();
+            dateCompletedInput.valueAsDate = new Date();
+            updateFormStep(); 
+        }
+
+        volunteerForm.addEventListener('submit', handleFormSubmit);
+        downloadPdfBtn.addEventListener('click', handleDownloadPdf);
+        modalCloseBtn.addEventListener('click', closeModal);
+        window.addEventListener('click', (event) => { 
+            if (event.target === messageModal) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', initializeForm);
+    </script>
+</body>
+</html>

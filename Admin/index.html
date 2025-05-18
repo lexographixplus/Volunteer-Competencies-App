@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Admin Dashboard (Firebase)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+        .sidebar { background: linear-gradient(180deg, #4F46E5 0%, #3730a3 100%); color: white; }
+        .sidebar a, .sidebar button { transition: background-color 0.3s ease, color 0.3s ease; border-left: 4px solid transparent; }
+        .sidebar a:hover, .sidebar button:hover, .sidebar .active-tab { background-color: rgba(255, 255, 255, 0.1); border-left-color: #a5b4fc; color: white; }
+        .sidebar .active-tab { background-color: rgba(255, 255, 255, 0.2); font-weight: 600; }
+        .table-header th { background-color: #eef2ff; color: #3730a3; font-weight: 600; }
+        .modal { background-color: rgba(0, 0, 0, 0.6); transition: opacity 0.3s ease-in-out; }
+        
+        /* Modal Content and Scrolling Styles */
+        .modal-content {
+            background-color: white; /* Added explicitly, though Tailwind usually handles */
+            border-radius: 0.75rem; /* Corresponds to rounded-xl */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* Corresponds to shadow-2xl */
+            width: 100%;
+            transform: scale(0.95);
+            transition: transform 0.3s ease-in-out;
+            display: flex; /* Enable flex column layout */
+            flex-direction: column; /* Stack header, body, footer */
+            max-height: 90vh; /* Overall max height for the modal */
+            overflow: hidden; /* Prevent modal-content itself from scrolling */
+        }
+        .modal-content.scale-100 { /* Ensure transform works as intended */
+            transform: scale(1);
+        }
+        .modal-body { /* This class is on #modalBodyContent */
+            padding: 1.25rem; /* p-5 */
+            overflow-y: auto; /* Enable vertical scroll if content overflows */
+            flex-grow: 1; /* Allow body to take available space and push footer down */
+        }
+        /* Webkit scrollbar styling (already present, good) */
+        .modal-body::-webkit-scrollbar { width: 8px; }
+        .modal-body::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .modal-body::-webkit-scrollbar-thumb { background: #4F46E5; border-radius: 10px; }
+        .modal-body::-webkit-scrollbar-thumb:hover { background: #3730a3; }
+
+
+        .btn { padding: 0.65rem 1.25rem; border-radius: 8px; font-weight: 500; transition: all 0.3s ease; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-primary { background: linear-gradient(135deg, #4F46E5 0%, #8B5CF6 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); }
+        .btn-secondary { background-color: #e0e7ff; color: #4F46E5; border: 1px solid #4F46E5; }
+        .btn-secondary:hover { background-color: #c7d2fe; }
+        .btn-danger { background-color: #fee2e2; color: #dc2626; border: 1px solid #dc2626;}
+        .btn-danger:hover { background-color: #fecaca; }
+        .btn-disabled { opacity: 0.7; cursor: not-allowed; }
+        input[type="text"], input[type="search"], select { border: 1px solid #d1d5db; border-radius: 6px; padding: 0.5rem 0.75rem; transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out; background-color: white;}
+        input[type="text"]:focus, input[type="search"]:focus, select:focus { border-color: #4F46E5; box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.25); outline: none; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #4F46E5; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 2rem auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .spinner { border: 3px solid rgba(79, 70, 229, 0.3); border-radius: 50%; border-top-color: #4F46E5; width: 16px; height: 16px; animation: spin 1s ease-in-out infinite; margin-right: 8px; }
+        .btn .spinner-light { border-color: rgba(255,255,255,0.3); border-top-color: #fff;}
+    </style>
+</head>
+<body>
+    <div id="adminDashboardContent" class="hidden"> 
+        <div class="flex h-screen">
+            <aside class="sidebar w-64 min-h-screen p-6 space-y-4 hidden md:flex flex-col">
+                <div class="text-2xl font-bold mb-8 flex items-center"><i class="fas fa-shield-alt mr-3"></i> Admin Panel</div>
+                <nav class="flex-grow">
+                    <button data-tab="PST" class="tab-button w-full text-left px-4 py-3 rounded-lg active-tab flex items-center"><i class="fas fa-chalkboard-teacher mr-3 w-5"></i> PST</button>
+                    <button data-tab="IST-1" class="tab-button w-full text-left px-4 py-3 rounded-lg flex items-center"><i class="fas fa-book-reader mr-3 w-5"></i> IST-1</button>
+                    <button data-tab="IST-2" class="tab-button w-full text-left px-4 py-3 rounded-lg flex items-center"><i class="fas fa-graduation-cap mr-3 w-5"></i> IST-2</button>
+                    <button data-tab="COS" class="tab-button w-full text-left px-4 py-3 rounded-lg flex items-center"><i class="fas fa-flag-checkered mr-3 w-5"></i> COS</button>
+                </nav>
+                <div class="mt-auto">
+                     <button id="logoutButton" class="w-full text-left px-4 py-3 rounded-lg flex items-center hover:bg-red-500 hover:bg-opacity-20 text-indigo-200 hover:text-white">
+                        <i class="fas fa-sign-out-alt mr-3 w-5"></i> Logout
+                    </button>
+                    <div class="text-xs text-indigo-300 mt-2">© <span id="currentYear"></span> Created by Essa Janko</div>
+                </div>
+            </aside>
+
+            <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+                <header class="mb-8">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h1 id="currentTabTitle" class="text-3xl font-bold text-gray-800">PST Submissions</h1>
+                            <p class="text-sm text-gray-500">Logged in as: <span id="loggedInUserEmail" class="font-medium"></span></p>
+                        </div>
+                        <button id="mobileMenuButton" class="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-200 focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+                    </div>
+                    <aside id="mobileSidebar" class="sidebar fixed inset-0 z-40 w-64 min-h-screen p-6 space-y-4 flex-col transform -translate-x-full transition-transform duration-300 ease-in-out md:hidden">
+                        <div class="flex justify-between items-center mb-8">
+                            <div class="text-2xl font-bold flex items-center"><i class="fas fa-shield-alt mr-3"></i> Admin</div>
+                            <button id="closeMobileMenuButton" class="p-2 rounded-md text-white hover:bg-white hover:text-indigo-600 focus:outline-none"><i class="fas fa-times text-xl"></i></button>
+                        </div>
+                        <nav class="flex-grow">
+                            <button data-tab="PST" class="tab-button mobile-tab-button w-full text-left px-4 py-3 rounded-lg active-tab flex items-center"><i class="fas fa-chalkboard-teacher mr-3 w-5"></i> PST</button>
+                            <button data-tab="IST-1" class="tab-button mobile-tab-button w-full text-left px-4 py-3 rounded-lg flex items-center"><i class="fas fa-book-reader mr-3 w-5"></i> IST-1</button>
+                            <button data-tab="IST-2" class="tab-button mobile-tab-button w-full text-left px-4 py-3 rounded-lg flex items-center"><i class="fas fa-graduation-cap mr-3 w-5"></i> IST-2</button>
+                            <button data-tab="COS" class="tab-button mobile-tab-button w-full text-left px-4 py-3 rounded-lg flex items-center"><i class="fas fa-flag-checkered mr-3 w-5"></i> COS</button>
+                        </nav>
+                        <div class="mt-auto">
+                            <button id="mobileLogoutButton" class="w-full text-left px-4 py-3 rounded-lg flex items-center hover:bg-red-500 hover:bg-opacity-20 text-indigo-200 hover:text-white">
+                                <i class="fas fa-sign-out-alt mr-3 w-5"></i> Logout
+                            </button>
+                            <div class="text-xs text-indigo-300 mt-2">© <span id="mobileCurrentYear"></span> Created by Essa Janko</div>
+                        </div>
+                    </aside>
+                </header>
+
+                <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <input type="search" id="searchName" placeholder="Search by Name..." class="w-full">
+                        <input type="search" id="searchCommunity" placeholder="Search by Community..." class="w-full">
+                        <input type="search" id="searchEmail" placeholder="Search by Email..." class="w-full">
+                        <input type="search" id="searchCohort" placeholder="Search by Cohort (e.g. G1)..." class="w-full">
+                        <input type="search" id="searchYear" placeholder="Search by Year (e.g. 2023)..." class="w-full">
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg overflow-x-auto">
+                    <div id="loader" class="loader hidden"></div>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="table-header">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Name</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Community</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Email</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Cohort</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Date Submitted</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                    </table>
+                    <div id="noDataMessage" class="text-center py-8 text-gray-500 hidden">
+                        No data available for this category or filter.
+                    </div>
+                    <div id="paginationControls" class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                        </div>
+                </div>
+            </main>
+        </div>
+
+        <div id="entryModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4 hidden opacity-0">
+             <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl lg:max-w-3xl transform scale-95 flex flex-col">
+                <div class="flex justify-between items-center p-5 border-b border-gray-200 bg-indigo-600 text-white rounded-t-xl flex-shrink-0">
+                    <h3 id="modalEntryTitle" class="text-xl font-semibold">Volunteer Submission Details</h3>
+                    <button id="closeModalBtn" class="text-white hover:text-indigo-200 text-2xl focus:outline-none">×</button>
+                </div>
+                <div id="modalBodyContent" class="p-5 sm:p-6 modal-body flex-grow overflow-y-auto">
+                    </div>
+                <div class="p-5 border-t border-gray-200 bg-gray-50 rounded-b-xl flex justify-end space-x-3 flex-shrink-0">
+                    <button id="downloadModalPdfBtn" class="btn btn-secondary px-5 py-2.5 text-sm font-medium">
+                        <span id="pdfBtnText"><i class="fas fa-file-pdf mr-2"></i>Download PDF</span>
+                        <div id="pdfSpinner" class="spinner hidden"></div>
+                    </button>
+                    <button id="cancelModalBtn" class="btn btn-primary px-5 py-2.5 text-sm font-medium">Close</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="messageModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden opacity-0 bg-black bg-opacity-50">
+            <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center transform scale-95 transition-transform duration-300">
+                <h3 id="messageModalTitle" class="text-lg font-semibold mb-2 text-indigo-700">Notification</h3>
+                <p id="messageModalText" class="text-sm text-gray-600 mb-4">Message here.</p>
+                <button id="messageModalCloseBtn" class="btn btn-primary px-4 py-2 rounded-md text-sm">OK</button>
+            </div>
+        </div>
+    </div> 
+    <div id="authLoader" class="flex justify-center items-center h-screen">
+        <div class="loader"></div>
+        <p class="ml-4 text-lg text-gray-600">Authenticating...</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_lcgd9BO8udBIKgvqLfbpWwBQx4gKIqk",
+            authDomain: "volunteer-competencies.firebaseapp.com",
+            projectId: "volunteer-competencies",
+            storageBucket: "volunteer-competencies.appspot.com",
+            messagingSenderId: "834830665261",
+            appId: "1:834830665261:web:3ef0bfd09600d8ba8a5aa4"
+        };
+
+        const fbApp = initializeApp(firebaseConfig);
+        const db = getFirestore(fbApp); 
+        const auth = getAuth(fbApp);
+        console.log("Firebase Admin Panel Initialized with Firestore and Auth support.");
+
+        const adminDashboardContent = document.getElementById('adminDashboardContent');
+        const authLoader = document.getElementById('authLoader');
+        const loggedInUserEmailSpan = document.getElementById('loggedInUserEmail');
+        const logoutButton = document.getElementById('logoutButton');
+        const mobileLogoutButton = document.getElementById('mobileLogoutButton');
+
+        const currentTabTitle = document.getElementById('currentTabTitle');
+        const dataTableBody = document.getElementById('dataTableBody');
+        const loader = document.getElementById('loader');
+        const noDataMessage = document.getElementById('noDataMessage');
+        const searchInputs = {
+            name: document.getElementById('searchName'),
+            community: document.getElementById('searchCommunity'),
+            email: document.getElementById('searchEmail'),
+            cohort: document.getElementById('searchCohort'), 
+            year: document.getElementById('searchYear')    
+        };
+        const entryModal = document.getElementById('entryModal');
+        const modalEntryTitle = document.getElementById('modalEntryTitle');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelModalBtn = document.getElementById('cancelModalBtn');
+        const modalBodyContent = document.getElementById('modalBodyContent');
+        const downloadModalPdfBtn = document.getElementById('downloadModalPdfBtn');
+        const pdfBtnText = document.getElementById('pdfBtnText');
+        const pdfSpinner = document.getElementById('pdfSpinner');
+
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const mobileSidebar = document.getElementById('mobileSidebar');
+        const closeMobileMenuButton = document.getElementById('closeMobileMenuButton');
+        
+        const messageModal = document.getElementById('messageModal');
+        const messageModalTitle = document.getElementById('messageModalTitle');
+        const messageModalText = document.getElementById('messageModalText');
+        const messageModalCloseBtn = document.getElementById('messageModalCloseBtn');
+        
+        const CATEGORIES = ["PST", "IST-1", "IST-2", "COS"];
+        let currentTab = "PST";
+        let allData = {}; 
+        let currentDisplayData = [];
+        let filterTimeout;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Admin user signed in:", user.email);
+                authLoader.style.display = 'none';
+                adminDashboardContent.classList.remove('hidden');
+                if(loggedInUserEmailSpan) loggedInUserEmailSpan.textContent = user.email; // Check if element exists
+                initializeAdminPanel(); 
+            } else {
+                console.log("Admin user signed out. Redirecting to login.");
+                window.location.href = '../admin-login.html'; 
+            }
+        });
+
+        async function handleLogout() {
+            try {
+                await firebaseSignOut(auth);
+                console.log("Admin user signed out successfully.");
+            } catch (error) {
+                console.error("Error signing out admin:", error);
+                showGenericMessage("Logout Error", `Failed to logout: ${error.message}`, true);
+            }
+        }
+        if(logoutButton) logoutButton.addEventListener('click', handleLogout); // Check if element exists
+        if(mobileLogoutButton) mobileLogoutButton.addEventListener('click', handleLogout);
+
+
+        function showGenericMessage(title, text, isError = false) {
+            messageModalTitle.textContent = title;
+            messageModalText.textContent = text;
+            messageModalTitle.className = `text-lg font-semibold mb-2 ${isError ? 'text-red-600' : 'text-indigo-700'}`;
+            messageModal.classList.remove('hidden', 'opacity-0');
+            messageModal.querySelector('div').classList.add('scale-100');
+            messageModal.querySelector('div').classList.remove('scale-95');
+        }
+        function closeGenericMessage() {
+            messageModal.querySelector('div').classList.remove('scale-100');
+            messageModal.querySelector('div').classList.add('scale-95');
+            messageModal.classList.add('opacity-0');
+            setTimeout(() => messageModal.classList.add('hidden'), 300);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                return new Date(dateString).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+            } catch (e) {
+                return dateString; 
+            }
+        }
+        
+        function sanitizeHTML(str) {
+            if (str === null || typeof str === 'undefined') return '';
+            const temp = document.createElement('div');
+            temp.textContent = String(str);
+            return temp.innerHTML;
+        }
+
+        async function fetchDataForTab(tabName) {
+            if (allData[tabName] && allData[tabName].data.length > 0 && !allData[tabName].forceRefresh) {
+                filterAndRenderTable();
+                return;
+            }
+            loader.classList.remove('hidden');
+            dataTableBody.innerHTML = ''; 
+            noDataMessage.classList.add('hidden');
+            
+            try {
+                const q = query(collection(db, tabName), orderBy("SubmissionTimestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+                const fetchedData = [];
+                querySnapshot.forEach((doc) => {
+                    fetchedData.push({ firestoreDocId: doc.id, ...doc.data() }); 
+                });
+                
+                allData[tabName] = {
+                    data: fetchedData,
+                    headers: fetchedData.length > 0 ? Object.keys(fetchedData[0]) : [],
+                    forceRefresh: false
+                };
+                filterAndRenderTable();
+            } catch (error) {
+                console.error(`Error fetching data for ${tabName} from Firestore:`, error);
+                showGenericMessage('Error Loading Data', `Could not load data for ${tabName}. ${error.message}. Check console and Firebase security rules.`, true);
+                noDataMessage.textContent = `Error loading data for ${tabName}.`;
+                noDataMessage.classList.remove('hidden');
+                allData[tabName] = { data: [], headers: [] }; 
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        function renderTable(dataToRender) {
+            dataTableBody.innerHTML = ''; 
+            if (!dataToRender || dataToRender.length === 0) {
+                noDataMessage.textContent = `No data available for ${currentTab} with current filters.`;
+                noDataMessage.classList.remove('hidden');
+                return;
+            }
+            noDataMessage.classList.add('hidden');
+
+            const fragment = document.createDocumentFragment();
+            dataToRender.forEach((item) => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-indigo-50 transition-colors duration-150 cursor-pointer";
+                // **CORRECTED Field Names to camelCase**
+                row.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${sanitizeHTML(item.volunteerName)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${sanitizeHTML(item.volunteerCommunity)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${sanitizeHTML(item.volunteerEmail)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${sanitizeHTML(item.volunteerCohort)}</td> 
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">${formatDate(item.SubmissionTimestamp)}</td>
+                    <td class="px-4 py-3 text-sm"></td>
+                `;
+                const viewButton = document.createElement('button');
+                viewButton.innerHTML = '<i class="fas fa-eye mr-1"></i> View';
+                viewButton.className = 'btn btn-primary text-xs px-3 py-1.5 rounded-md shadow-sm hover:shadow-md';
+                viewButton.onclick = (event) => {
+                    event.stopPropagation(); 
+                    openEntryModal(item);
+                };
+                row.cells[5].appendChild(viewButton);
+                row.onclick = () => openEntryModal(item);
+                fragment.appendChild(row);
+            });
+            dataTableBody.appendChild(fragment);
+        }
+
+        function filterAndRenderTable() {
+            if (!allData[currentTab] || !allData[currentTab].data) {
+                renderTable([]);
+                return;
+            }
+            const filters = {
+                name: searchInputs.name.value.toLowerCase(),
+                community: searchInputs.community.value.toLowerCase(),
+                email: searchInputs.email.value.toLowerCase(),
+                cohort: searchInputs.cohort.value.toLowerCase(), 
+                year: searchInputs.year.value.trim() 
+            };
+
+            currentDisplayData = allData[currentTab].data.filter(item => {
+                const itemYear = item.SubmissionTimestamp ? new Date(item.SubmissionTimestamp).getFullYear().toString() : '';
+                // **CORRECTED Field Names to camelCase**
+                return (item.volunteerName || '').toLowerCase().includes(filters.name) &&
+                       (item.volunteerCommunity || '').toLowerCase().includes(filters.community) &&
+                       (item.volunteerEmail || '').toLowerCase().includes(filters.email) &&
+                       (item.volunteerCohort || '').toLowerCase().includes(filters.cohort) && 
+                       (filters.year === '' || itemYear === filters.year); 
+            });
+            renderTable(currentDisplayData);
+        }
+        
+        function handleSearchInput() {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(filterAndRenderTable, 300);
+        }
+
+        function switchTab(tabName) {
+            currentTab = tabName;
+            currentTabTitle.textContent = `${tabName} Submissions`;
+            
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.toggle('active-tab', btn.dataset.tab === tabName);
+            });
+
+            Object.values(searchInputs).forEach(input => input.value = '');
+            fetchDataForTab(tabName);
+            if (mobileSidebar.classList.contains('translate-x-0')) {
+                mobileSidebar.classList.replace('translate-x-0', '-translate-x-full');
+            }
+        }
+
+        function openEntryModal(entry) {
+            modalBodyContent.innerHTML = '<div class="loader my-8"></div>'; 
+            // **CORRECTED Field Name to camelCase**
+            modalEntryTitle.textContent = `Details for ${sanitizeHTML(entry.volunteerName || 'Volunteer')}`;
+            entryModal.classList.remove('hidden', 'opacity-0');
+            const modalContentDiv = entryModal.querySelector('.modal-content');
+            if (modalContentDiv) { // Ensure it exists
+                 modalContentDiv.classList.remove('scale-95');
+                 modalContentDiv.classList.add('scale-100');
+            }
+            
+            setTimeout(() => renderModalContent(entry), 50);
+            downloadModalPdfBtn.currentEntry = entry; 
+        }
+        
+       function renderModalContent(entry) {
+            let contentHtml = '<div class="space-y-6">';
+            const headers = Object.keys(entry); 
+            
+            // **CORRECTED Field Names to camelCase in personalInfoFields**
+            const personalInfoFields = ['volunteerName', 'volunteerCommunity', 'volunteerEmail', 'volunteerCohort', 'formCompletedBy', 'dateCompleted', 'SubmissionTimestamp', 'SubmissionID', 'Category', 'firestoreDocId'];
+            
+            contentHtml += '<div class="p-4 bg-indigo-50 rounded-lg shadow-sm">';
+            contentHtml += '<h4 class="text-lg font-semibold text-indigo-700 mb-3 border-b border-indigo-200 pb-2">Personal Information</h4>';
+            personalInfoFields.forEach(key => {
+                // Use original key from entry for display label, access entry[key] for value
+                if (entry.hasOwnProperty(key) && entry[key] !== undefined && entry[key] !== null && String(entry[key]).trim() !== '') {
+                     const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+                     let value = sanitizeHTML(String(entry[key]));
+                     if (key === 'SubmissionTimestamp' || key === 'dateCompleted') {
+                         value = formatDate(entry[key]);
+                     }
+                     contentHtml += `<div class="grid grid-cols-3 gap-2 py-1.5 border-b border-indigo-100 last:border-b-0">
+                                        <strong class="text-sm text-gray-600 col-span-1">${label}:</strong> 
+                                        <span class="text-sm text-gray-800 col-span-2 break-all">${value}</span>
+                                     </div>`;
+                }
+            });
+            contentHtml += '</div>';
+
+            const competencyFields = headers.filter(h => !personalInfoFields.includes(h));
+            const groupedCompetencies = {};
+            competencyFields.forEach(key => {
+                if (entry.hasOwnProperty(key) && entry[key] !== undefined && entry[key] !== null && String(entry[key]).trim() !== '') {
+                    const baseName = key.replace(/_Rating$/, '').replace(/_Evidence$/, '');
+                    if (!groupedCompetencies[baseName]) groupedCompetencies[baseName] = {};
+                    if (key.endsWith('_Rating')) groupedCompetencies[baseName].Rating = entry[key];
+                    else if (key.endsWith('_Evidence')) groupedCompetencies[baseName].Evidence = entry[key];
+                    else groupedCompetencies[baseName][key] = entry[key]; 
+                }
+            });
+            
+            let competenciesHtml = '';
+            for (const compName in groupedCompetencies) {
+                const label = compName.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+                competenciesHtml += `<div class="mb-3 p-3 border border-green-200 rounded-md bg-white">
+                                  <strong class="block text-md font-medium text-green-600 mb-1">${label}:</strong>`;
+                if (groupedCompetencies[compName].Rating !== undefined) {
+                     competenciesHtml += `<div class="text-sm"><span class="font-semibold text-gray-600">Rating:</span> ${sanitizeHTML(groupedCompetencies[compName].Rating)}/5</div>`;
+                }
+                if (groupedCompetencies[compName].Evidence) { 
+                     competenciesHtml += `<div class="text-sm mt-1"><span class="font-semibold text-gray-600">Evidence:</span> <p class="mt-0.5 pl-2 text-gray-700 whitespace-pre-wrap break-all">${sanitizeHTML(groupedCompetencies[compName].Evidence)}</p></div>`;
+                }
+                Object.keys(groupedCompetencies[compName]).forEach(subKey => {
+                    if (subKey !== 'Rating' && subKey !== 'Evidence') {
+                        const subLabel = subKey.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+                        competenciesHtml += `<div class="text-sm mt-1"><span class="font-semibold text-gray-600">${subLabel}:</span> <span class="break-all">${sanitizeHTML(groupedCompetencies[compName][subKey])}</span></div>`;
+                    }
+                });
+                competenciesHtml += `</div>`;
+            }
+
+            if(competenciesHtml) {
+                contentHtml += '<div class="p-4 bg-green-50 rounded-lg shadow-sm mt-6">';
+                contentHtml += '<h4 class="text-lg font-semibold text-green-700 mb-3 border-b border-green-200 pb-2">Competencies Assessment & Other Data</h4>';
+                contentHtml += competenciesHtml;
+                contentHtml += '</div>';
+            }
+            
+            contentHtml += '</div>'; 
+            modalBodyContent.innerHTML = contentHtml;
+        }
+
+        function closeModal() {
+            entryModal.classList.add('opacity-0');
+            const modalContentDiv = entryModal.querySelector('.modal-content');
+            if(modalContentDiv){
+                modalContentDiv.classList.remove('scale-100');
+                modalContentDiv.classList.add('scale-95');
+            }
+            setTimeout(() => {
+                 entryModal.classList.add('hidden');
+                 modalBodyContent.innerHTML = ''; 
+                 downloadModalPdfBtn.currentEntry = null; 
+            }, 300);
+        }
+
+        async function handleModalPdfDownload() {
+            const entryToPrint = downloadModalPdfBtn.currentEntry;
+            if (!entryToPrint) {
+                showGenericMessage('Error', 'No entry data to generate PDF.', true);
+                return;
+            }
+            if (typeof html2canvas === 'undefined' || typeof jspdf === 'undefined') {
+                showGenericMessage('Error', 'PDF libraries not loaded.', true);
+                return;
+            }
+            
+            pdfBtnText.classList.add('hidden');
+            pdfSpinner.classList.remove('hidden');
+            downloadModalPdfBtn.disabled = true;
+            downloadModalPdfBtn.classList.add('btn-disabled');
+
+            const printableArea = document.createElement('div');
+            printableArea.id = "pdfPrintableArea";
+            Object.assign(printableArea.style, { 
+                position: "absolute", left: "-9999px", width: "800px", padding: "20px", 
+                fontFamily: "'Inter', sans-serif", backgroundColor: "white", fontSize: "12px"
+            });
+            
+            let pdfContentHtml = `<h1 style="font-size: 20px; font-weight: bold; color: #3730a3; margin-bottom: 15px; text-align: center;">Volunteer Submission Details</h1>`;
+            pdfContentHtml += `<h2 style="font-size: 16px; font-weight: 600; color: #4F46E5; margin-bottom: 8px;">Category: ${sanitizeHTML(entryToPrint.category || 'N/A')}</h2>`; // Corrected to entryToPrint.category
+            
+            const headers = Object.keys(entryToPrint);
+            // **CORRECTED Field Names to camelCase**
+            const personalInfoFields = ['volunteerName', 'volunteerCommunity', 'volunteerEmail', 'volunteerCohort', 'formCompletedBy', 'dateCompleted', 'SubmissionTimestamp', 'SubmissionID', 'firestoreDocId'];
+            
+            pdfContentHtml += `<div style="margin-bottom: 15px; padding: 12px; border: 1px solid #e0e7ff; border-radius: 6px; background-color: #f0f4f8;">`;
+            pdfContentHtml += `<h3 style="font-size: 14px; font-weight: 600; color: #3730a3; margin-bottom:8px; border-bottom: 1px solid #c7d2fe; padding-bottom: 4px;">Personal Information</h3>`;
+            personalInfoFields.forEach(key => {
+                if (entryToPrint.hasOwnProperty(key) && entryToPrint[key] !== undefined && entryToPrint[key] !== null && String(entryToPrint[key]).trim() !== '') {
+                    const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+                    let value = sanitizeHTML(String(entryToPrint[key]));
+                     if (key === 'SubmissionTimestamp' || key === 'dateCompleted') { // Corrected from DateCompleted
+                         value = formatDate(entryToPrint[key]);
+                     }
+                    pdfContentHtml += `<div style="display: flex; margin-bottom: 6px; font-size: 11px;">
+                                          <strong style="min-width: 160px; color: #4b5563;">${label}:</strong> 
+                                          <span style="color: #1f2937; word-break: break-all;">${value}</span>
+                                       </div>`;
+                }
+            });
+            pdfContentHtml += `</div>`;
+
+            const competencyFields = headers.filter(h => !personalInfoFields.includes(h) && h !== 'category'); // Corrected from Category
+            const groupedCompetencies = {};
+             competencyFields.forEach(key => {
+                if (entryToPrint.hasOwnProperty(key) && entryToPrint[key] !== undefined && entryToPrint[key] !== null && String(entryToPrint[key]).trim() !== '') {
+                    const baseName = key.replace(/_Rating$/, '').replace(/_Evidence$/, '');
+                    if (!groupedCompetencies[baseName]) groupedCompetencies[baseName] = {};
+                    if (key.endsWith('_Rating')) groupedCompetencies[baseName].Rating = entryToPrint[key];
+                    else if (key.endsWith('_Evidence')) groupedCompetencies[baseName].Evidence = entryToPrint[key];
+                    else groupedCompetencies[baseName][key] = entryToPrint[key];
+                }
+            });
+
+            let competenciesPdfHtml = '';
+            for (const compName in groupedCompetencies) {
+                const label = compName.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+                competenciesPdfHtml += `<div style="margin-bottom: 10px; padding: 8px; border: 1px solid #a7f3d0; border-radius: 4px; background-color: #fff;">
+                                      <strong style="display: block; font-size: 12px; font-weight: 600; color: #065f46; margin-bottom: 4px;">${label}:</strong>`;
+                if (groupedCompetencies[compName].Rating !== undefined) {
+                     competenciesPdfHtml += `<div style="font-size: 11px; margin-bottom: 2px;"><span style="font-weight: 500; color: #4b5563;">Rating:</span> ${sanitizeHTML(groupedCompetencies[compName].Rating)}/5</div>`;
+                }
+                if (groupedCompetencies[compName].Evidence) {
+                     const evidenceHTML = sanitizeHTML(groupedCompetencies[compName].Evidence).replace(/\n/g, '<br>');
+                     competenciesPdfHtml += `<div style="font-size: 11px;"><span style="font-weight: 500; color: #4b5563;">Evidence:</span> <div style="margin-top: 2px; padding-left: 6px; color: #374151; word-break: break-word;">${evidenceHTML}</div></div>`;
+                }
+                Object.keys(groupedCompetencies[compName]).forEach(subKey => {
+                    if (subKey !== 'Rating' && subKey !== 'Evidence') {
+                        const subLabel = subKey.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+                        competenciesPdfHtml += `<div style="font-size: 11px; margin-top:2px;"><span style="font-weight: 500; color: #4b5563;">${subLabel}:</span> ${sanitizeHTML(groupedCompetencies[compName][subKey])}</div>`;
+                    }
+                });
+                competenciesPdfHtml += `</div>`;
+            }
+            if(competenciesPdfHtml){
+                pdfContentHtml += `<div style="margin-top: 15px; padding: 12px; border: 1px solid #d1fae5; border-radius: 6px; background-color: #f0fdf4;">`;
+                pdfContentHtml += `<h3 style="font-size: 14px; font-weight: 600; color: #047857; margin-bottom:8px; border-bottom: 1px solid #a7f3d0; padding-bottom: 4px;">Competencies Assessment & Other Data</h3>`;
+                pdfContentHtml += competenciesPdfHtml;
+                pdfContentHtml += `</div>`;
+            }
+            printableArea.innerHTML = pdfContentHtml;
+            document.body.appendChild(printableArea);
+
+            try {
+                const canvas = await html2canvas(printableArea, { scale: 2, useCORS: true, windowWidth: printableArea.scrollWidth, windowHeight: printableArea.scrollHeight, logging: false });
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({orientation: 'p', unit: 'mm', format: 'a4', putOnlyUsedFonts:true, floatPrecision: 16});
+                
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const imgProps = pdf.getImageProperties(imgData);
+                const imgRatio = imgProps.width / imgProps.height;
+                
+                let finalImgWidth, finalImgHeight;
+                const margin = 10; 
+                const usableWidth = pdfWidth - 2 * margin;
+                const usableHeight = pdfHeight - 2 * margin;
+
+                if (imgProps.width / usableWidth > imgProps.height / usableHeight) { 
+                    finalImgWidth = usableWidth;
+                    finalImgHeight = finalImgWidth / imgRatio;
+                } else {
+                    finalImgHeight = usableHeight;
+                    finalImgWidth = finalImgHeight * imgRatio;
+                }
+                
+                const xPos = margin + (usableWidth - finalImgWidth) / 2;
+                const yPos = margin + (usableHeight - finalImgHeight) / 2;
+                
+                pdf.addImage(imgData, 'PNG', xPos, yPos, finalImgWidth, finalImgHeight);
+                // **CORRECTED Field Name to camelCase**
+                const volunteerName = entryToPrint.volunteerName || "Volunteer";
+                const category = entryToPrint.category || "Details"; // Corrected to entryToPrint.category
+                const date = new Date().toISOString().split('T')[0];
+                pdf.save(`${volunteerName.replace(/\s+/g, '_')}_${category}_Details_${date}.pdf`);
+                showGenericMessage('Success', 'PDF generated and downloaded!');
+            } catch (err) {
+                console.error("Error generating PDF:", err);
+                showGenericMessage('PDF Error', `Could not generate PDF. ${err.message}`, true);
+            } finally {
+                document.body.removeChild(printableArea);
+                pdfBtnText.classList.remove('hidden');
+                pdfSpinner.classList.add('hidden');
+                downloadModalPdfBtn.disabled = false;
+                downloadModalPdfBtn.classList.remove('btn-disabled');
+            }
+        }
+        
+        function initializeAdminPanel() {
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            document.getElementById('mobileCurrentYear').textContent = new Date().getFullYear();
+            
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => switchTab(button.dataset.tab));
+            });
+            Object.values(searchInputs).forEach(input => {
+                input.addEventListener('input', handleSearchInput);
+            });
+            closeModalBtn.addEventListener('click', closeModal);
+            cancelModalBtn.addEventListener('click', closeModal);
+            entryModal.addEventListener('click', (event) => { 
+                if (event.target === entryModal) closeModal();
+            });
+            downloadModalPdfBtn.addEventListener('click', handleModalPdfDownload);
+            messageModalCloseBtn.addEventListener('click', closeGenericMessage);
+
+            mobileMenuButton.addEventListener('click', () => mobileSidebar.classList.replace('-translate-x-full', 'translate-x-0'));
+            closeMobileMenuButton.addEventListener('click', () => mobileSidebar.classList.replace('translate-x-0', '-translate-x-full'));
+
+            switchTab(currentTab); 
+        }
+    </script>
+</body>
+</html>
