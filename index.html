@@ -13,32 +13,32 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
+            background-color: #f0f4f8; /* Light gray-blue background */
         }
         .form-container {
             background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 12px; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Softer shadow */
             transition: box-shadow 0.3s ease-in-out;
         }
         .form-container:hover {
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15); /* Enhanced hover shadow */
         }
         .form-header {
-            background: linear-gradient(135deg, #4F46E5 0%, #8B5CF6 100%);
+            background: linear-gradient(135deg, #4F46E5 0%, #8B5CF6 100%); /* Indigo gradient */
             color: white;
             padding: 2rem;
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
         }
         .form-section-title { 
-            color: #3730a3; 
+            color: #3730a3; /* Darker indigo */
             padding: 0.75rem 0; 
             font-weight: 700; 
             font-size: 1.25rem; 
             margin-top: 1.5rem;
             margin-bottom: 1rem;
-            border-bottom: 2px solid #e0e7ff;
+            border-bottom: 2px solid #e0e7ff; /* Lighter indigo border */
         }
         .btn {
             padding: 0.75rem 1.5rem;
@@ -60,12 +60,12 @@
             box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
         }
         .btn-secondary {
-            background-color: #e0e7ff;
-            color: #4F46E5;
+            background-color: #e0e7ff; /* Lighter indigo background */
+            color: #4F46E5; /* Indigo text */
             border: 1px solid #4F46E5;
         }
         .btn-secondary:hover {
-            background-color: #c7d2fe;
+            background-color: #c7d2fe; /* Slightly darker indigo background on hover */
         }
         .btn-disabled {
             opacity: 0.7;
@@ -73,10 +73,10 @@
         }
         label {
             font-weight: 500;
-            color: #374151;
+            color: #374151; /* Dark gray text */
         }
         input[type="text"], input[type="email"], input[type="date"], select, textarea {
-            border: 1px solid #d1d5db;
+            border: 1px solid #d1d5db; /* Gray border */
             border-radius: 6px;
             padding: 0.5rem 0.75rem;
             width: 100%;
@@ -84,23 +84,24 @@
             background-color: white;
         }
         input[type="text"]:focus, input[type="email"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
-            border-color: #4F46E5;
+            border-color: #4F46E5; /* Indigo focus */
             box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.25);
             outline: none;
         }
-        .rating-group label {
+        .rating-group label { /* Rating labels */
             margin-right: 0.5rem;
+            cursor: pointer;
         }
         .rating-group input[type="radio"] {
             margin-right: 0.25rem;
         }
-        .custom-modal {
+        .custom-modal { /* Modal styling */
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0,0,0,0.5); /* Semi-transparent background */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -131,33 +132,33 @@
         .custom-modal-content h3 {
             margin-top: 0;
             margin-bottom: 1rem;
-            color: #3730a3;
+            color: #3730a3; /* Darker indigo */
         }
         .custom-modal-content p {
             margin-bottom: 1.5rem;
-            color: #4b5563;
+            color: #4b5563; /* Medium gray */
         }
         .custom-modal-close-btn {
-            background-color: #4F46E5;
+            background-color: #4F46E5; /* Indigo */
             color: white;
             padding: 0.5rem 1rem;
             border-radius: 6px;
             border: none;
             cursor: pointer;
         }
-        .spinner {
+        .spinner { /* Spinner for submit button */
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            border-top-color: #fff;
+            border-top-color: #fff; /* White top border for contrast */
             width: 20px;
             height: 20px;
             animation: spin 1s ease-in-out infinite;
-            margin-right: 8px;
+            margin-right: 8px; /* Space between spinner and text */
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        .form-step {
+        .form-step { /* Form step animation */
             display: none;
             animation: fadeIn 0.5s;
         }
@@ -168,23 +169,23 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .step-navigation {
+        .step-navigation { /* Navigation buttons container */
             margin-top: 2rem;
             display: flex;
             justify-content: space-between;
         }
-        .progress-bar {
+        .progress-bar { /* Progress bar styling */
             display: flex;
             justify-content: space-around;
             margin-bottom: 2rem;
             padding: 0.5rem 0;
-            border-bottom: 1px solid #e0e7ff;
+            border-bottom: 1px solid #e0e7ff; /* Lighter indigo border */
         }
         .progress-step {
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: #d1d5db;
+            color: #d1d5db; /* Light gray for inactive steps */
             font-size: 0.75rem; 
             text-align: center;
             position: relative;
@@ -194,52 +195,54 @@
             width: 28px; 
             height: 28px;
             border-radius: 50%;
-            background-color: currentColor;
+            background-color: currentColor; /* Uses text color for dot background */
             margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: white; /* Text color inside dot */
             font-weight: bold;
             transition: background-color 0.3s, color 0.3s;
-            border: 2px solid #e0e7ff; 
+            border: 2px solid #e0e7ff; /* Lighter indigo border */
         }
          .progress-step.active .dot {
-            background-color: #4F46E5;
+            background-color: #4F46E5; /* Indigo for active step dot */
             border-color: #4F46E5;
         }
         .progress-step.active {
-            color: #4F46E5;
+            color: #4F46E5; /* Indigo for active step text */
             font-weight: 600;
         }
         .progress-step.completed .dot {
-            background-color: #10B981;
+            background-color: #10B981; /* Green for completed step dot */
             border-color: #10B981;
         }
         .progress-step.completed {
-            color: #059669;
+            color: #059669; /* Darker green for completed step text */
         }
-        .progress-step:not(:last-child)::after {
+        .progress-step:not(:last-child)::after { /* Connector line between steps */
             content: '';
             position: absolute;
-            top: 14px; 
+            top: 14px; /* Align with center of dot */
             left: 50%;
             width: calc(100% - 30px); 
             height: 2px;
-            background-color: #e0e7ff;
+            background-color: #e0e7ff; /* Lighter indigo for line */
             z-index: -1;
-            transform: translateX(15px);
+            transform: translateX(15px); /* Position line correctly */
         }
          .progress-step.completed:not(:last-child)::after {
-            background-color: #10B981;
+            background-color: #10B981; /* Green line for completed steps */
         }
-        .competency-item { 
+        .competency-item { /* Styling for each competency block */
              margin-bottom: 1.5rem; 
              padding: 1rem; 
-             border: 1px solid #e5e7eb; 
+             border: 1px solid #e5e7eb; /* Light gray border */
              border-radius: 8px; 
-             background-color: #f9fafb;
+             background-color: #f9fafb; /* Very light gray background */
         }
+        .border-red-500 { border-color: #ef4444 !important; } /* Utility for validation */
+        .text-red-500 { color: #ef4444 !important; } /* Utility for validation text */
 
     </style>
 </head>
@@ -289,7 +292,8 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     <div>
-                        <label for="formCompletedBy">Country:</label> <input type="text" id="formCompletedBy" name="formCompletedBy" required>
+                        <label for="formCompletedBy">Country (e.g., The Gambia):</label> 
+                        <input type="text" id="formCompletedBy" name="formCompletedBy" required>
                     </div>
                     <div>
                         <label for="dateCompleted">Date Completed:</label>
@@ -357,8 +361,7 @@
                         <button type="button" id="downloadPdfBtn" class="btn btn-secondary">Download as PDF</button>
                         <button type="submit" id="submitBtn" class="btn btn-primary">
                             <span id="submitBtnText">SUBMIT</span>
-                            <div id="submitSpinner" class="spinner hidden"></div>
-                        </button>
+                            <div id="submitSpinner" class="spinner hidden"></div> </button>
                     </div>
                 </div>
             </div>
@@ -374,11 +377,13 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
+        // Updated Firebase SDK imports to version 10.12.2
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+        // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyD_lcgd9BO8udBIKgvqLfbpWwBQx4gKIqk",
+            apiKey: "AIzaSyD_lcgd9BO8udBIKgvqLfbpWwBQx4gKIqk", // Replace with your actual API key
             authDomain: "volunteer-competencies.firebaseapp.com",
             projectId: "volunteer-competencies",
             storageBucket: "volunteer-competencies.appspot.com",
@@ -386,10 +391,12 @@
             appId: "1:834830665261:web:3ef0bfd09600d8ba8a5aa4"
         };
 
+        // Initialize Firebase
         const fbApp = initializeApp(firebaseConfig);
         const db = getFirestore(fbApp);
-        console.log("Firebase Initialized for Volunteer Form with Firestore support.");
+        console.log("Firebase Initialized for Volunteer Form with Firestore support (v10.12.2).");
 
+        // DOM Elements
         const volunteerForm = document.getElementById('volunteerForm');
         const downloadPdfBtn = document.getElementById('downloadPdfBtn');
         const submitBtn = document.getElementById('submitBtn');
@@ -408,6 +415,7 @@
         const progressBarSteps = document.querySelectorAll('.progress-step');
         let currentStep = 0;
 
+        // Competency data structure
         const competenciesData = [
             { 
                 sectionTitle: "Exemplify Leadership & Commitment to Service",
@@ -443,17 +451,18 @@
             }
         ];
 
+        // Function to render a section of competencies
         function renderCompetencySection(sectionData, containerId) {
             const container = document.getElementById(containerId);
             if (!container) {
                 console.error(`Container with id ${containerId} not found for section: ${sectionData.sectionTitle}`);
                 return;
             }
-            container.innerHTML = ''; 
+            container.innerHTML = ''; // Clear previous content
 
             sectionData.competencies.forEach(comp => {
                 const compDiv = document.createElement('div');
-                compDiv.className = 'competency-item';
+                compDiv.className = 'competency-item'; // Apply styling
                 compDiv.innerHTML = `
                     <h3 class="text-lg font-semibold text-indigo-700 mb-1">${comp.name}</h3>
                     <p class="text-sm text-gray-600 mb-3">${comp.description}</p>
@@ -461,7 +470,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Rating (1=Does not meet, 5=Exemplary):</label>
                         <div class="flex flex-wrap items-center rating-group">
                             ${[1, 2, 3, 4, 5].map(i => `
-                                <label class="mr-4 text-sm text-gray-600 cursor-pointer">
+                                <label class="mr-4 text-sm text-gray-600">
                                     <input type="radio" name="${comp.id}_Rating" value="${i}" class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500" required>
                                     ${i}
                                 </label>
@@ -477,6 +486,7 @@
             });
         }
 
+        // Render all competency sections
         function renderAllCompetencies() {
             renderCompetencySection(competenciesData[0], 'competenciesSection1'); 
             renderCompetencySection(competenciesData[1], 'competenciesSection2'); 
@@ -484,94 +494,104 @@
             renderCompetencySection(competenciesData[3], 'competenciesSection4');
         }
 
+        // Modal display functions
         function showModal(title, message) {
             modalTitle.textContent = title;
             modalMessage.textContent = message;
             messageModal.classList.add('show');
         }
 
-        function closeModal() {
+        function closeModalMessageHandler() { 
             messageModal.classList.remove('show');
         }
 
+        // Submit button state management
         function setSubmitButtonState(isSubmitting) {
             if (isSubmitting) {
                 submitBtn.disabled = true;
                 submitBtn.classList.add('btn-disabled');
-                submitBtnText.textContent = 'Submitting...';
+                submitBtnText.textContent = 'Submitting...'; 
                 submitSpinner.classList.remove('hidden');
             } else {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('btn-disabled');
-                submitBtnText.textContent = 'Submit Form';
+                submitBtnText.textContent = 'SUBMIT'; 
                 submitSpinner.classList.add('hidden');
             }
         }
 
+        // Handle form submission
         async function handleFormSubmit(event) {
             event.preventDefault();
             if (!validateStep(currentStep)) { 
-                showModal('Validation Error', 'Please complete all required fields in the final section.');
+                showModal('Validation Error', 'Please complete all required fields in the final section before submitting.');
                 return;
             }
             setSubmitButtonState(true);
             
             const formData = new FormData(volunteerForm);
             const data = {};
-            // Ensure consistent casing for field names if rules expect camelCase
             formData.forEach((value, key) => {
-                // Example: convert VolunteerName to volunteerName if needed, though FormData usually uses HTML name attribute directly
-                // For this form, HTML name attributes are already mostly camelCase or appropriate.
-                data[key] = value;
+                // *** MODIFICATION: Convert rating fields to numbers ***
+                if (key.endsWith('_Rating')) {
+                    data[key] = parseInt(value, 10); // Or parseFloat(value) if decimal ratings were possible
+                } else {
+                    data[key] = value;
+                }
             });
 
-            // Ensure 'formCompletedBy' is included if it's in the form
-            // The HTML has been updated to re-add formCompletedBy.
-
-            data['SubmissionID'] = `SUB-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-            data['SubmissionTimestamp'] = new Date().toISOString();
+            data['SubmissionID'] = `SUB-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`; 
+            data['SubmissionTimestamp'] = serverTimestamp(); 
             
-            // ***** CONSOLE LOG FOR DEBUGGING *****
-            console.log("Data being sent to Firestore:", JSON.stringify(data, null, 2));
-            console.log("Category being used for collection:", data.category);
-            // ***** END CONSOLE LOG *****
+            console.log("Data being sent to Firestore:", JSON.stringify(data, null, 2)); // For debugging
+            console.log("Category being used for collection:", data.category); // For debugging
+
+            if (!data.category) {
+                showModal('Submission Error', 'Program category is missing. Please select a category.');
+                setSubmitButtonState(false);
+                return;
+            }
 
             try {
                 const docRef = await addDoc(collection(db, data.category), data);
                 console.log("Document written to Firestore with ID: ", docRef.id);
                 showModal('Success!', 'Thank you! Your form has been submitted successfully.');
                 volunteerForm.reset(); 
-                dateCompletedInput.valueAsDate = new Date(); 
+                if(dateCompletedInput) dateCompletedInput.valueAsDate = new Date(); 
                 currentStep = 0; 
                 updateFormStep();
+                renderAllCompetencies(); 
             } catch (error) {
                 console.error('Error submitting to Firestore:', error); 
-                showModal('Submission Failed', `Could not submit to Firebase. Error: ${error.message}. Check console and ensure Firestore rules allow writes to the '${data.category}' collection with all required fields correctly sent.`);
+                showModal('Submission Failed', `Could not submit to Firebase. Error: ${error.message}. Ensure Firestore rules allow writes to the '${data.category}' collection and data types match rule expectations (e.g., ratings as numbers).`);
             } finally {
                 setSubmitButtonState(false);
             }
         }
 
+        // Handle PDF download
         async function handleDownloadPdf() {
-            if (typeof html2canvas === 'undefined' || typeof jspdf === 'undefined') {
-                showModal('Error', 'PDF generation libraries are not loaded.');
+            if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+                showModal('Error', 'PDF generation libraries (html2canvas or jsPDF) are not loaded.');
                 return;
             }
             const { jsPDF } = window.jspdf;
-            const formToPrint = document.getElementById('volunteerForm');
+            const formToPrint = document.getElementById('volunteerFormContainer'); 
             showModal('Processing PDF', 'Generating PDF, please wait...');
 
             const originalDisplayStates = steps.map(step => step.style.display);
             const originalActionButtonsDisplay = document.getElementById('formActionButtons').style.display;
+            const originalProgressBarDisplay = document.getElementById('progressBar').style.display;
 
             steps.forEach(step => step.style.display = 'block'); 
             document.getElementById('formActionButtons').style.display = 'none'; 
+            document.getElementById('progressBar').style.display = 'none'; 
 
             try {
-                const canvas = await html2canvas(formToPrint, {
+                const canvas = await html2canvas(formToPrint, { 
                     scale: 1.5, 
                     useCORS: true,
-                    logging: false,
+                    logging: false, 
                     windowWidth: formToPrint.scrollWidth,
                     windowHeight: formToPrint.scrollHeight
                 });
@@ -579,10 +599,11 @@
                 steps.forEach((step, index) => step.style.display = originalDisplayStates[index]); 
                 updateFormStep(); 
                 document.getElementById('formActionButtons').style.display = originalActionButtonsDisplay;
+                document.getElementById('progressBar').style.display = originalProgressBarDisplay;
 
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jsPDF({
-                    orientation: 'p',
+                    orientation: 'p', 
                     unit: 'mm',
                     format: 'a4',
                     putOnlyUsedFonts: true,
@@ -593,7 +614,7 @@
                 const imgProps = pdf.getImageProperties(imgData);
                 const imgRatio = imgProps.width / imgProps.height;
                 let finalImgWidth, finalImgHeight;
-                const margin = 10;
+                const margin = 10; 
                 const usableWidth = pdfWidth - 2 * margin;
                 const usableHeight = pdfHeight - 2 * margin;
 
@@ -604,29 +625,33 @@
                     finalImgHeight = usableHeight;
                     finalImgWidth = finalImgHeight * imgRatio;
                 }
-                const xPos = margin + (usableWidth - finalImgWidth) / 2;
-                const yPos = margin + (usableHeight - finalImgHeight) / 2;
+                const xPos = margin + (usableWidth - finalImgWidth) / 2; 
+                const yPos = margin + (usableHeight - finalImgHeight) / 2; 
 
                 pdf.addImage(imgData, 'PNG', xPos, yPos, finalImgWidth, finalImgHeight);
-                const volunteerNameInput = document.getElementById('volunteerName'); // Use consistent naming
+                
+                const volunteerNameInput = document.getElementById('volunteerName');
                 const categoryInput = document.getElementById('category');
-
                 const volunteerName = volunteerNameInput ? volunteerNameInput.value : "Volunteer";
-                const category = categoryInput ? categoryInput.value : "Form";
-                const date = new Date().toISOString().split('T')[0];
-                pdf.save(`${volunteerName.replace(/\s+/g, '_')}_${category}_Competencies_${date}.pdf`);
-                closeModal();
-                setTimeout(() => showModal('PDF Generated', 'Your PDF has been downloaded successfully!'), 100);
+                const categoryValue = categoryInput ? categoryInput.value : "Form"; 
+                const dateStr = new Date().toISOString().split('T')[0]; 
+
+                pdf.save(`${volunteerName.replace(/\s+/g, '_')}_${categoryValue}_Competencies_${dateStr}.pdf`);
+                closeModalMessageHandler(); 
+                setTimeout(() => showModal('PDF Generated', 'Your PDF has been downloaded successfully!'), 100); 
             } catch (err) {
                 console.error("Error generating PDF:", err);
                 steps.forEach((step, index) => step.style.display = originalDisplayStates[index]); 
                 updateFormStep();
                 document.getElementById('formActionButtons').style.display = originalActionButtonsDisplay;
-                closeModal();
+                document.getElementById('progressBar').style.display = originalProgressBarDisplay;
+
+                closeModalMessageHandler();
                 setTimeout(() => showModal('PDF Error', `Could not generate PDF. Error: ${err.message}`), 100);
             }
         }
 
+        // Update form step display
         function updateFormStep() {
             steps.forEach((step, index) => {
                 step.classList.toggle('active-step', index === currentStep);
@@ -634,56 +659,67 @@
             updateProgressBar();
         }
 
+        // Validate current step fields
         function validateStep(stepIndex) {
             const currentStepElement = steps[stepIndex];
-            const inputs = currentStepElement.querySelectorAll('input[required], select[required], textarea[required]'); // Note: Textareas are not typically 'required' for content in the same way as inputs/selects for validation unless you add custom logic for them.
+            const inputs = currentStepElement.querySelectorAll('input[required], select[required]'); 
             let isValid = true;
             let firstInvalidInput = null;
 
             inputs.forEach(input => {
                 let fieldValid = true;
                 input.classList.remove('border-red-500');
-                input.classList.add('border-gray-300');
+                input.classList.add('border-d1d5db'); 
                 const groupContainer = input.closest('.rating-group');
-                if (groupContainer) groupContainer.classList.remove('border-red-500', 'border-2');
-                const competencyDiv = input.closest('.competency-item');
-                if (competencyDiv) {
-                    const titleEl = competencyDiv.querySelector('h3');
-                    if (titleEl) titleEl.classList.remove('text-red-500');
+                if (groupContainer) {
+                    groupContainer.classList.remove('border-red-500', 'border-2', 'p-1', 'rounded'); 
+                    const competencyItem = groupContainer.closest('.competency-item');
+                    if (competencyItem) {
+                        const titleEl = competencyItem.querySelector('h3');
+                        if (titleEl) titleEl.classList.remove('text-red-500');
+                    }
                 }
 
                 if (input.type === 'radio') {
                     const radioGroup = currentStepElement.querySelectorAll(`input[name="${input.name}"]`);
                     if (!Array.from(radioGroup).some(radio => radio.checked)) {
                         fieldValid = false;
-                        if (groupContainer) groupContainer.classList.add('border-red-500', 'border-2');
-                        if (competencyDiv) {
-                            const titleEl = competencyDiv.querySelector('h3');
-                            if (titleEl) titleEl.classList.add('text-red-500');
+                        if (groupContainer) {
+                             groupContainer.classList.add('border-red-500', 'border-2', 'p-1', 'rounded'); 
+                             const competencyItem = groupContainer.closest('.competency-item');
+                             if (competencyItem) {
+                                 const titleEl = competencyItem.querySelector('h3');
+                                 if (titleEl) titleEl.classList.add('text-red-500'); 
+                             }
                         }
                     }
-                } else if (input.tagName.toLowerCase() !== 'textarea' && !input.value.trim()) { // Don't trim-check textareas for emptiness validation in this basic check, they can be intentionally empty.
-                    fieldValid = false;
-                    input.classList.add('border-red-500');
-                    input.classList.remove('border-gray-300');
-                } else if (input.tagName.toLowerCase() === 'select' && input.value === "") { // For select elements
+                } else if (input.tagName.toLowerCase() === 'select' && input.value === "") {
                      fieldValid = false;
                     input.classList.add('border-red-500');
-                    input.classList.remove('border-gray-300');
+                    input.classList.remove('border-d1d5db');
+                } else if (input.type !== 'radio' && input.tagName.toLowerCase() !== 'select' && !input.value.trim()) { 
+                    fieldValid = false;
+                    input.classList.add('border-red-500');
+                    input.classList.remove('border-d1d5db');
                 }
                 
-                if (!fieldValid && isValid) {
+                if (!fieldValid && isValid) { 
                     isValid = false;
                     firstInvalidInput = input;
                 }
             });
 
             if (!isValid && firstInvalidInput) {
-                firstInvalidInput.focus();
+                firstInvalidInput.focus(); 
+                if (firstInvalidInput.type === 'radio') {
+                    const radioGroup = currentStepElement.querySelectorAll(`input[name="${firstInvalidInput.name}"]`);
+                    if (radioGroup.length > 0) radioGroup[0].focus();
+                }
             }
             return isValid;
         }
         
+        // Update progress bar display
         function updateProgressBar() {
             progressBarSteps.forEach((stepElement, index) => {
                 const dot = stepElement.querySelector('.dot');
@@ -699,17 +735,18 @@
             });
         }
 
+        // Event listeners for next/prev buttons
         nextBtns.forEach(button => {
             button.addEventListener('click', () => {
                 if (validateStep(currentStep)) {
                     if (currentStep < steps.length - 1) {
-                        progressBarSteps[currentStep].classList.add('completed');
                         progressBarSteps[currentStep].classList.remove('active');
+                        progressBarSteps[currentStep].classList.add('completed');
                         progressBarSteps[currentStep].querySelector('.dot').innerHTML = '<i class="fas fa-check text-sm"></i>';
-
+                        
                         currentStep++;
                         updateFormStep();
-                        window.scrollTo(0,0); 
+                        window.scrollTo({ top: 0, behavior: 'smooth' }); 
                     }
                 } else {
                     showModal('Validation Error', 'Please complete all required fields in the current section before proceeding.');
@@ -721,29 +758,34 @@
             button.addEventListener('click', () => {
                 if (currentStep > 0) {
                     progressBarSteps[currentStep].classList.remove('active');
-                    progressBarSteps[currentStep].querySelector('.dot').textContent = currentStep + 1;
-                    if(currentStep > 0) {
-                       progressBarSteps[currentStep -1].classList.remove('completed');
+                    progressBarSteps[currentStep].querySelector('.dot').textContent = currentStep + 1; 
+                    
+                    if (progressBarSteps[currentStep].classList.contains('completed')) {
+                         progressBarSteps[currentStep].classList.remove('completed');
                     }
+
                     currentStep--;
-                    updateFormStep();
-                     window.scrollTo(0,0); 
+                    updateFormStep(); 
+                     window.scrollTo({ top: 0, behavior: 'smooth' }); 
                 }
             });
         });
 
+        // Initialize the form
         function initializeForm() {
             renderAllCompetencies();
-            dateCompletedInput.valueAsDate = new Date();
+            if(dateCompletedInput) dateCompletedInput.valueAsDate = new Date(); 
             updateFormStep(); 
         }
 
-        volunteerForm.addEventListener('submit', handleFormSubmit);
-        downloadPdfBtn.addEventListener('click', handleDownloadPdf);
-        modalCloseBtn.addEventListener('click', closeModal);
+        // Attach event listeners
+        if (volunteerForm) volunteerForm.addEventListener('submit', handleFormSubmit);
+        if (downloadPdfBtn) downloadPdfBtn.addEventListener('click', handleDownloadPdf);
+        if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModalMessageHandler);
+        
         window.addEventListener('click', (event) => { 
             if (event.target === messageModal) {
-                closeModal();
+                closeModalMessageHandler();
             }
         });
 
